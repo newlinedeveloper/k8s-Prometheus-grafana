@@ -53,3 +53,77 @@ kubectl port-forward svc/prometheus-grafana -n kubernetes-monitoring 3001:80
 
 ```
 
+#### Basic PromQL queries for Prometheus
+
+- Query to get the average CPU usage across all instances:
+
+```
+avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100
+```
+
+- Query to get the total memory usage across all instances:
+
+```
+sum(node_memory_MemTotal_bytes) - sum(node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes)
+```
+- Query to get the total number of pods in the Kubernetes cluster:
+
+```
+count(kube_pod_info)
+```
+
+### Example Alert Queries
+
+- last disk usage > 90 %
+
+```
+100 - (node_filesystem_avail_bytes{fstype="ext4"} / node_filesystem_size_bytes{fstype="ext4"}) * 100 > 90
+
+```
+
+- avg mem > 90% for 5 mintues
+
+```
+avg_over_time(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes{instance="your_instance"}[5m]) / avg_over_time(node_memory_MemTotal_bytes{instance="your_instance"}[5m]) * 100 > 90
+```
+
+- Avg temp outside (10,30) for 10 mintues
+```
+avg_over_time(outside_temperature{location="your_location"}[10m])
+
+```
+
+#### Troubleshooting for Alert configuration
+
+**SMTP Configuration for Email noficiation**
+
+
+```
+kubectl get deployments -n kubernetes-monitoring
+
+kubectl edit deploy prometheus-grafana -n kubernetes-monitoring
+
+```
+
+add env to grafana container
+
+```
+- env:
+ — name: GF_SMTP_ENABLED
+ value: “true”
+ — name: GF_SMTP_HOST
+ value: localhost:587
+ — name: GF_SMTP_PASSWORD
+ value: xxxxxxxxxxxx
+ — name: GF_SMTP_USER
+ value: apikey
+ — name: GF_SMTP_FROM_ADDRESS
+ value: test@gmail.com
+ — name: GF_SMTP_FROM_NAME
+ value: System Admin
+
+```
+
+
+
+
