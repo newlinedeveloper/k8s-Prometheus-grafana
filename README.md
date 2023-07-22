@@ -51,6 +51,9 @@ kubectl port-forward svc/prometheus-kube-state-metrics -n kubernetes-monitoring 
 
 kubectl port-forward svc/prometheus-grafana -n kubernetes-monitoring 3001:80
 
+
+helm uninstall prometheus -n kubernetes-monitoring
+
 ```
 
 #### Basic PromQL queries for Prometheus
